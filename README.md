@@ -5,7 +5,7 @@ This project involves providing detailed information on the installation and con
 
 ---
 
-## Show PCI identification number and [Vendor-ID:Device-ID] of the graphics card and USB controller:
+## 1.) Show PCI identification number and [Vendor-ID:Device-ID] of the graphics card and USB controller:
 
     lspci -nn | grep -i amd #All AMD graphics cards are displayed!
 
@@ -26,7 +26,7 @@ And here the correct vfio-pci ids:
 
 ---
 
-## Installation & Configuration of GRUB/Init/Modules
+## 2.) Installation & Configuration of GRUB/Init/Modules
 
 ### Debian
 
@@ -202,11 +202,51 @@ And here the correct vfio-pci ids:
 
 ---
 
-## Check & Verify VFIO control over PCI Devices
+### Optional for all Linux Distro's - Change the default directory/drive for the virtual machines (guests)
+
+In order to be able to change the default storage location of KVM Libvirt, you should also change this file (/etc/libvirt/qemu.conf):
+
+![222960741-8770a034-e1e1-40b9-bd70-6e052f67b053](https://github.com/user-attachments/assets/c0504bdd-6138-4c1a-99a3-729c0c9e1f7d)
+
+Further information can be found here:
+
+- https://ostechnix.com/how-to-change-kvm-libvirt-default-storage-pool-location/
+- https://ostechnix.com/solved-cannot-access-storage-file-permission-denied-error-in-kvm-libvirt/
+
+---
+
+## 3.) Check & Verify VFIO control over PCI Devices
 
 After your machien reboots, run lspci -nnk to show which kernel driver has control over each PCI device. All devices should show vfio-pci as the kernel driver in use. If not, you will need to repeat the previous steps to disable that driver.
 
     lspci -nnk
+
+---
+
+## 4.) Configure Virt-Manager (Example)
+
+I have already published a [video on my YouTube channel](https://www.youtube.com/live/6u-ZKKVg9-A?feature=shared&t=10884) where I showed how, for example, you can pass a graphics card and a PCI USB card to the guest.
+
+---
+
+## 5.) Troubleshootings
+
+### KVM cannot start the "default" network in MicroOS!
+
+If you get this failure message by running the "default" network:
+
+    sudo virsh net-start default
+    error: Failed to start network default
+    error: internal error: Failed to apply firewall rules /sbin/iptables -w --table filter --list-rules:
+    libvirt: error : cannot execute binary /sbin/iptables: Permission denied
+
+You can temporarily bypass this issue with these commands:
+
+    sudo setenforce 0
+    sudo systemctl stop firewalld # If installed & configured firewalld
+    sudo systemctl restart libvirtd # If installed & configured firewalld
+    sudo systemctl start firewalld # If installed & configured firewalld
+    sudo virsh net-start default
 
 ---
 
