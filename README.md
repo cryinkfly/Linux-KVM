@@ -24,6 +24,8 @@ For example my GPU and PCI-USB controller:
 
 ---
 
+## Installation & Configuration of GRUB/Init/Modules
+
 ### Debian
 
     su -
@@ -52,6 +54,11 @@ For example my GPU and PCI-USB controller:
 
     update-initramfs -k all -u
 
+    systemctl enable libvirtd
+    usermod -aG libvirt steve #For example username: steve
+
+    sudo reboot
+
 ---
 
 ### Ubuntu
@@ -76,6 +83,11 @@ For example my GPU and PCI-USB controller:
 
     sudo update-initramfs -k all -u
 
+    sudo systemctl enable libvirtd
+    sudo usermod -aG libvirt $(whoami)
+
+    sudo reboot
+
 ---
 
 ### Fedora
@@ -99,6 +111,11 @@ For example my GPU and PCI-USB controller:
 
     sudo dracut -f --kver $(uname -r)
 
+    sudo systemctl enable libvirtd
+    sudo usermod -aG libvirt $(whoami)
+
+    sudo reboot
+
 #### Fedora Atomics (Silverblue, ...)
 
     rpm-ostree install virt-install libvirt-daemon-config-network libvirt-daemon-kvm qemu-kvm virt-manager virt-viewer guestfs-tools libguestfs-tools virt-top bridge-utils edk2-ovmf
@@ -114,6 +131,11 @@ For example my GPU and PCI-USB controller:
       --arg="--add-drivers" \
       --arg="vfio vfio_iommu_type1 vfio_pci kvm kvm_amd" \
       --reboot
+
+    sudo systemctl enable libvirtd
+    sudo usermod -aG libvirt $(whoami)
+
+    sudo reboot
 
 ---
 
@@ -139,6 +161,9 @@ For example my GPU and PCI-USB controller:
     add_drivers+="pci_stub vfio vfio_iommu_type1 vfio_pci vfio_virqfd kvm kvm_amd" # For Intel CPU: kvm_intel
 
     sudo mkinitrd
+
+    sudo systemctl enable libvirtd
+    sudo usermod -aG libvirt $(whoami)
 
     sudo reboot
 
@@ -167,9 +192,19 @@ For example my GPU and PCI-USB controller:
 
     sudo reboot
 
+    sudo systemctl enable libvirtd
+    sudo usermod -aG libvirt $(whoami)
+
+    sudo reboot
+
+
 ---
 
+## Check & Verify VFIO control over PCI Devices
+
 After your machien reboots, run lspci -nnk to show which kernel driver has control over each PCI device. All devices should show vfio-pci as the kernel driver in use. If not, you will need to repeat the previous steps to disable that driver.
+
+    lspci -nnk
 
 ---
 
