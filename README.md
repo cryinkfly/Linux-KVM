@@ -33,6 +33,8 @@ For example my GPU and PCI-USB controller:
     
     # Enable the IOMMU feature and the [vfio-pci] kernel module on the KVM host (line 6).
     GRUB_CMDLINE_LINUX="rhgb quiet amd_iommu=on iommu=pt rd.driver.pre=vfio-pci video=efifb:off kvm.ignore_msrs=1 kvm.report_ignored_msrs=0" # For Intel CPU: intel_iommu=on
+
+    update-grub # Or: grub-mkconfig -o /boot/grub/grub.cfg
     
     nano /etc/initramfs-tools/modules
 
@@ -48,6 +50,8 @@ For example my GPU and PCI-USB controller:
     softdep amdgpu pre: vfio-pci
     softdep xhci_pci pre: vfio_pci   
 
+    update-initramfs -k all -u
+
 ---
 
 ### Ubuntu
@@ -60,6 +64,8 @@ For example my GPU and PCI-USB controller:
     # Enable the IOMMU feature and the [vfio-pci] kernel module on the KVM host (line 6).
     GRUB_CMDLINE_LINUX="rhgb quiet amd_iommu=on iommu=pt rd.driver.pre=vfio-pci video=efifb:off kvm.ignore_msrs=1 kvm.report_ignored_msrs=0" # For Intel CPU: intel_iommu=on
 
+    update-grub # Or: grub-mkconfig -o /boot/grub/grub.cfg
+
     sudo nano /etc/initram-fs/modules
     
     vfio
@@ -67,6 +73,8 @@ For example my GPU and PCI-USB controller:
     vfio_pci
     vfio_virqfd
     options vfio-pci ids=1002:7422,1002:ab28,1b21:2142
+
+    sudo update-initramfs -k all -u
 
 ---
 
