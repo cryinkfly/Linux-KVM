@@ -19,6 +19,9 @@ For example my GPU and PCI-USB controller:
     12:00.1 Audio device [0403]: Advanced Micro Devices, Inc. [AMD/ATI] Navi 21/23 HDMI/DP Audio Controller [1002:ab28]
     06:00.0 USB controller [0c03]: ASMedia Technology Inc. ASM2142/ASM3142 USB 3.1 Host Controller [1b21:2142]
 
+    # vfio-pci ids=<someID,someOtherID>
+    vfio-pci ids=1002:7422,1002:ab28,1b21:2142
+
 ---
 
 ### Debian
@@ -26,12 +29,44 @@ For example my GPU and PCI-USB controller:
     su -
     apt install bridge-utils guestfs-tools libguestfs-tools libvirt-clients libvirt-daemon ovmf qemu-system-x86 qemu-utils virt-manager virt-viewer virtinst
 
+    nano /etc/default/grub
+    
+    # Enable the IOMMU feature and the [vfio-pci] kernel module on the KVM host (line 6).
+    GRUB_CMDLINE_LINUX="rhgb quiet amd_iommu=on iommu=pt rd.driver.pre=vfio-pci video=efifb:off kvm.ignore_msrs=1 kvm.report_ignored_msrs=0" # For Intel CPU: intel_iommu=on
+    
+    nano /etc/initramfs-tools/modules
+
+    vfio
+    vfio_iommu_type1
+    vfio_pci
+    vfio_virqfd
+    options vfio-pci ids=1002:7422,1002:ab28,1b21:2142
+
+    nano /etc/modprobe.d/vfio.conf
+    
+    options vfio-pci ids=1002:7422,1002:ab28,1b21:2142
+    softdep amdgpu pre: vfio-pci
+    softdep xhci_pci pre: vfio_pci   
+
 ---
 
 ### Ubuntu
 
     sudo apt update
     sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager
+
+    sudo nano /etc/default/grub
+    
+    # Enable the IOMMU feature and the [vfio-pci] kernel module on the KVM host (line 6).
+    GRUB_CMDLINE_LINUX="rhgb quiet amd_iommu=on iommu=pt rd.driver.pre=vfio-pci video=efifb:off kvm.ignore_msrs=1 kvm.report_ignored_msrs=0" # For Intel CPU: intel_iommu=on
+
+    sudo nano /etc/initram-fs/modules
+    
+    vfio
+    vfio_iommu_type1
+    vfio_pci
+    vfio_virqfd
+    options vfio-pci ids=1002:7422,1002:ab28,1b21:2142
 
 ---
 
@@ -44,7 +79,7 @@ For example my GPU and PCI-USB controller:
     sudo nano /etc/default/grub
 
     # Enable the IOMMU feature and the [vfio-pci] kernel module on the KVM host (line 6).
-    GRUB_CMDLINE_LINUX="rhgb quiet amd_iommu=on iommu=pt video=efifb:off" # For Intel CPU: intel_iommu=on
+    GRUB_CMDLINE_LINUX="rhgb quiet amd_iommu=on iommu=pt rd.driver.pre=vfio-pci video=efifb:off kvm.ignore_msrs=1 kvm.report_ignored_msrs=0" # For Intel CPU: intel_iommu=on
     
     sudo grub2-mkconfig -o /etc/grub2-efi.cfg
 
@@ -52,7 +87,7 @@ For example my GPU and PCI-USB controller:
 
     rpm-ostree install virt-install libvirt-daemon-config-network libvirt-daemon-kvm qemu-kvm virt-manager virt-viewer guestfs-tools libguestfs-tools virt-top bridge-utils edk2-ovmf
     
-    sudo rpm-ostree kargs --append-if-missing="amd_iommu=on" --append-if-missing="iommu=pt" --append-if-missing="video=efifb:off" --append-if-missing="rd.driver.pre=vfio_pci" --reboot # For Intel CPU: intel_iommu=on
+    sudo rpm-ostree kargs --append-if-missing="rhgb" --append-if-missing="amd_iommu=on" --append-if-missing="iommu=pt" --append-if-missing="video=efifb:off" --append-if-missing="rd.driver.pre=vfio_pci" --append-if-missing="kvm.ignore_msrs=1" --append-if-missing="kvm.report_ignored_msrs=0"  --reboot # For Intel CPU: intel_iommu=on
 
 ---
 
@@ -66,7 +101,7 @@ For example my GPU and PCI-USB controller:
     su -c 'nano /etc/default/grub'
 
     # Enable the IOMMU feature and the [vfio-pci] kernel module on the KVM host (line 6).
-    GRUB_CMDLINE_LINUX="rhgb quiet amd_iommu=on iommu=pt video=efifb:off" # For Intel CPU: intel_iommu=on
+    GRUB_CMDLINE_LINUX="rhgb quiet amd_iommu=on iommu=pt rd.driver.pre=vfio-pci video=efifb:off kvm.ignore_msrs=1 kvm.report_ignored_msrs=0" # For Intel CPU: intel_iommu=on
 
     sudo grub2-mkconfig -o /boot/grub2/grub.cfg
 
@@ -91,7 +126,7 @@ For example my GPU and PCI-USB controller:
     su -c 'nano /etc/default/grub'
 
     # Enable the IOMMU feature and the [vfio-pci] kernel module on the KVM host (line 6).
-    GRUB_CMDLINE_LINUX="rhgb quiet amd_iommu=on iommu=pt video=efifb:off" # For Intel CPU: intel_iommu=on
+    GRUB_CMDLINE_LINUX="rhgb quiet amd_iommu=on iommu=pt rd.driver.pre=vfio-pci video=efifb:off kvm.ignore_msrs=1 kvm.report_ignored_msrs=0" # For Intel CPU: intel_iommu=on
 
     sudo transactional-update grub.cfg
 
