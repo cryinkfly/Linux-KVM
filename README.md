@@ -70,43 +70,11 @@ For example my GPU and PCI-USB controller:
 
 ---
 
-## 2. Configuration of /etc/default/grub
-
-### 2.1 Open the GRUB configuration file for editing:
-
-The GRUB configuration file defines how your kernel is loaded, and it's sometimes necessary to modify it for enabling virtualization features or specific kernel modules.
-
-    sudo nano /etc/default/grub
-
-    # OR
-
-    su -
-    nano /etc/default/grub
-
-    # OR
-    
-    su -c 'nano /etc/default/grub' # openSUSE Micro OS ...
-
-### 2.2 Modify the GRUB_CMDLINE_LINUX_DEFAULT line to include any virtualization options you may need. For example, to enable IOMMU for better hardware virtualization support:
-
-Enable the IOMMU feature and the [vfio-pci] kernel module on the KVM host (line 6).
-
-    for AMD CPU, set [amd_iommu=on iommu=pt video=efifb:off]
-    for INTEL CPU, set [intel_iommu=on iommu=pt video=efifb:off]
-
 *Note 1: The "video=efifb:off" option should only be added if your system is configured to automatically load the graphical environment! If you want to switch to the graphical environment via the terminal after booting, you may no longer see the terminal.*
 
 *Note 2: In addition, the option causes problems with some NVIDIA graphics cards!*
 
 *Note 3: Basically, the "amd_iommu=on" or "intel_iommu=on" option would also suffice, but you get better performance in the guest VM with the "iommu=pt" option and with the "video=efifb:off" option will prevent the driver from stealing the GPU.*
 
-![237171775-a91e4c93-92e3-4397-88df-6e68d10eee01](https://github.com/user-attachments/assets/1d1400af-709f-4f11-98e0-a85aacd19e3f)
+*Note 4: This kernel parameter (rd.driver.pre=vfio_pci) ensures that the vfio_pci module is loaded early, during the initramfs stage of the boot process. It is commonly used for binding PCI devices to the vfio-pci driver, which allows them to be passed through to virtual machines.
 
-### 2.3 Update GRUB to apply the changes:
-
-    sudo update-grub  # For Debian/Ubuntu
-    sudo grub2-mkconfig -o /boot/grub2/grub.cfg  # For CentOS/RHEL/Fedora/openSUSE Leap & TW
-
-    # openSUSE Micro OS ...
-    su -c 'nano /etc/default/grub'
-    
