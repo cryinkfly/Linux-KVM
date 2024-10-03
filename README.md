@@ -19,6 +19,8 @@ For example my GPU and PCI-USB controller:
     12:00.1 Audio device [0403]: Advanced Micro Devices, Inc. [AMD/ATI] Navi 21/23 HDMI/DP Audio Controller [1002:ab28]
     06:00.0 USB controller [0c03]: ASMedia Technology Inc. ASM2142/ASM3142 USB 3.1 Host Controller [1b21:2142]
 
+And here the correct vfio-pci ids:
+
     # vfio-pci ids=<someID,someOtherID>
     vfio-pci ids=1002:7422,1002:ab28,1b21:2142
 
