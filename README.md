@@ -167,7 +167,9 @@ For example my GPU and PCI-USB controller:
 
     sudo reboot
 
+---
 
+After your machien reboots, run lspci -nnk to show which kernel driver has control over each PCI device. All devices should show vfio-pci as the kernel driver in use. If not, you will need to repeat the previous steps to disable that driver.
 
 ---
 
