@@ -83,11 +83,29 @@ For example my GPU and PCI-USB controller:
     
     sudo grub2-mkconfig -o /etc/grub2-efi.cfg
 
+    su -c 'echo "options vfio-pci ids=1002:7422,1002:ab28,1b21:2142" > /etc/modprobe.d/vfio.conf && echo "vfio-pci" > /etc/modules-load.d/vfio-pci.conf'
+
+    sudo nano /etc/dracut.conf.d/gpu-passthrough.conf
+
+    add_drivers+=" pci_stub vfio vfio_iommu_type1 vfio_pci kvm kvm_amd "
+
+    sudo dracut -f --kver $(uname -r)
+
 #### Fedora Atomics (Silverblue, ...)
 
     rpm-ostree install virt-install libvirt-daemon-config-network libvirt-daemon-kvm qemu-kvm virt-manager virt-viewer guestfs-tools libguestfs-tools virt-top bridge-utils edk2-ovmf
     
     sudo rpm-ostree kargs --append-if-missing="rhgb" --append-if-missing="amd_iommu=on" --append-if-missing="iommu=pt" --append-if-missing="video=efifb:off" --append-if-missing="rd.driver.pre=vfio_pci" --append-if-missing="kvm.ignore_msrs=1" --append-if-missing="kvm.report_ignored_msrs=0"  --reboot # For Intel CPU: intel_iommu=on
+
+    sudo rpm-ostree kargs \
+      --append-if-missing="vfio-pci.ids=1002:7422,1002:ab28,1b21:2142" \
+      --reboot
+
+    sudo rpm-ostree initramfs \
+      --enable \
+      --arg="--add-drivers" \
+      --arg="vfio vfio_iommu_type1 vfio_pci kvm kvm_amd" \
+      --reboot
 
 ---
 
