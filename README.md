@@ -269,5 +269,6 @@ You can temporarily bypass this issue with these commands:
 
 *Note 3: Basically, the "amd_iommu=on" or "intel_iommu=on" option would also suffice, but you get better performance in the guest VM with the "iommu=pt" option and with the "video=efifb:off" option will prevent the driver from stealing the GPU.*
 
-*Note 4: This kernel parameter (rd.driver.pre=vfio_pci) ensures that the vfio_pci module is loaded early, during the initramfs stage of the boot process. It is commonly used for binding PCI devices to the vfio-pci driver, which allows them to be passed through to virtual machines.*
+*Note 4: The kernel parameter "rd.driver.pre=vfio_pci" ensures that the vfio_pci module is loaded early, during the initramfs stage of the boot process. It is commonly used for binding PCI devices to the vfio-pci driver, which allows them to be passed through to virtual machines.*
 
+*Note 5: The kernel parameters "kvm.ignore_msrs=1" and "kvm.report_ignored_msrs=0" solved some issues with running Windows 10 & 11 guests!*
