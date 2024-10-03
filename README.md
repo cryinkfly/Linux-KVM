@@ -44,7 +44,7 @@ For example my GPU and PCI-USB controller:
     sudo nano /etc/default/grub
 
     # Enable the IOMMU feature and the [vfio-pci] kernel module on the KVM host (line 6).
-    GRUB_CMDLINE_LINUX="rhgb quiet amd_iommu=on iommu=pt video=efifb:off" #For Intel CPU: intel_iommu=on
+    GRUB_CMDLINE_LINUX="rhgb quiet amd_iommu=on iommu=pt video=efifb:off" # For Intel CPU: intel_iommu=on
     
     sudo grub2-mkconfig -o /etc/grub2-efi.cfg
 
@@ -52,7 +52,7 @@ For example my GPU and PCI-USB controller:
 
     rpm-ostree install virt-install libvirt-daemon-config-network libvirt-daemon-kvm qemu-kvm virt-manager virt-viewer guestfs-tools libguestfs-tools virt-top bridge-utils edk2-ovmf
     
-    sudo rpm-ostree kargs --append-if-missing="amd_iommu=on" --append-if-missing="iommu=pt" --append-if-missing="video=efifb:off" --append-if-missing="rd.driver.pre=vfio_pci" --reboot #For Intel CPU: intel_iommu=on
+    sudo rpm-ostree kargs --append-if-missing="amd_iommu=on" --append-if-missing="iommu=pt" --append-if-missing="video=efifb:off" --append-if-missing="rd.driver.pre=vfio_pci" --reboot # For Intel CPU: intel_iommu=on
 
 ---
 
@@ -63,10 +63,50 @@ For example my GPU and PCI-USB controller:
     sudo zypper install -t pattern kvm_server kvm_tools
     sudo zypper install libvirt libvirt-client libvirt-daemon virt-manager virt-install virt-viewer qemu qemu-kvm qemu-ovmf-x86_64 qemu-tools
 
+    su -c 'nano /etc/default/grub'
+
+    # Enable the IOMMU feature and the [vfio-pci] kernel module on the KVM host (line 6).
+    GRUB_CMDLINE_LINUX="rhgb quiet amd_iommu=on iommu=pt video=efifb:off" # For Intel CPU: intel_iommu=on
+
+    sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+
+    # Two files (/etc/modprobe.d/vfio.conf &/etc/modules-load.d/vfio-pci.conf) must be created and your device-specific numbers must be entered there:
+    su -c 'echo "options vfio-pci ids=1002:7422,1002:ab28,1b21:2142" > /etc/modprobe.d/vfio.conf && echo "vfio-pci" > /etc/modules-load.d/vfio-pci.conf'
+
+    # You need to rebuild the initial ram disk to include all the needed modules. Create a file named /etc/dracut.conf.d/gpu-passthrough.conf:
+    su -c 'nano /etc/dracut.conf.d/gpu-passthrough.conf'
+    add_drivers+="pci_stub vfio vfio_iommu_type1 vfio_pci vfio_virqfd kvm kvm_amd" # For Intel CPU: kvm_intel
+
+    sudo mkinitrd
+
+    sudo reboot
+
 #### openSUSE Micro OS - Aeon, Kalpa & Baldur
 
     sudo transactional-update pkg install -t pattern kvm_server kvm_tools
     sudo transactional-update -c pkg install libvirt libvirt-client libvirt-daemon virt-manager virt-install virt-viewer qemu qemu-kvm qemu-ovmf-x86_64 qemu-tools
+
+    sudo reboot
+
+    su -c 'nano /etc/default/grub'
+
+    # Enable the IOMMU feature and the [vfio-pci] kernel module on the KVM host (line 6).
+    GRUB_CMDLINE_LINUX="rhgb quiet amd_iommu=on iommu=pt video=efifb:off" # For Intel CPU: intel_iommu=on
+
+    sudo transactional-update grub.cfg
+
+    # Two files (/etc/modprobe.d/vfio.conf &/etc/modules-load.d/vfio-pci.conf) must be created and your device-specific numbers must be entered there:
+    su -c 'echo "options vfio-pci ids=1002:7422,1002:ab28,1b21:2142" > /etc/modprobe.d/vfio.conf && echo "vfio-pci" > /etc/modules-load.d/vfio-pci.conf'
+
+    # You need to rebuild the initial ram disk to include all the needed modules. Create a file named /etc/dracut.conf.d/gpu-passthrough.conf:
+    su -c 'nano /etc/dracut.conf.d/gpu-passthrough.conf'
+    add_drivers+="pci_stub vfio vfio_iommu_type1 vfio_pci vfio_virqfd kvm kvm_amd" # For Intel CPU: kvm_intel
+    
+    sudo transactional-update -c initrd
+
+    sudo reboot
+
+
 
 ---
 
@@ -76,5 +116,5 @@ For example my GPU and PCI-USB controller:
 
 *Note 3: Basically, the "amd_iommu=on" or "intel_iommu=on" option would also suffice, but you get better performance in the guest VM with the "iommu=pt" option and with the "video=efifb:off" option will prevent the driver from stealing the GPU.*
 
-*Note 4: This kernel parameter (rd.driver.pre=vfio_pci) ensures that the vfio_pci module is loaded early, during the initramfs stage of the boot process. It is commonly used for binding PCI devices to the vfio-pci driver, which allows them to be passed through to virtual machines.
+*Note 4: This kernel parameter (rd.driver.pre=vfio_pci) ensures that the vfio_pci module is loaded early, during the initramfs stage of the boot process. It is commonly used for binding PCI devices to the vfio-pci driver, which allows them to be passed through to virtual machines.*
 
