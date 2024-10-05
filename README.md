@@ -61,7 +61,15 @@ And here the correct vfio-pci ids:
     
     options vfio-pci ids=1002:7422,1002:ab28,1b21:2142
     softdep amdgpu pre: vfio-pci
-    softdep xhci_pci pre: vfio_pci   
+    softdep xhci_pci pre: vfio_pci
+    #softdep radeon pre: vfio-pci
+    #softdep snd_hda_intel pre: vfio-pci
+    #softdep nouveau pre: vfio-pci
+    #softdep nvidia pre: vfio-pci
+    #softdep nvidia* pre: vfio-pci
+    #softdep drm pre: vfio-pci
+    #softdep xhci_hdc pre: vfio-pci
+    #options kvm_amd avic=1
 
     update-initramfs -k all -u
 
@@ -91,6 +99,20 @@ And here the correct vfio-pci ids:
     vfio_pci
     vfio_virqfd
     options vfio-pci ids=1002:7422,1002:ab28,1b21:2142
+
+    nano /etc/modprobe.d/vfio.conf
+    
+    options vfio-pci ids=1002:7422,1002:ab28,1b21:2142
+    softdep amdgpu pre: vfio-pci
+    softdep xhci_pci pre: vfio_pci
+    #softdep radeon pre: vfio-pci
+    #softdep snd_hda_intel pre: vfio-pci
+    #softdep nouveau pre: vfio-pci
+    #softdep nvidia pre: vfio-pci
+    #softdep nvidia* pre: vfio-pci
+    #softdep drm pre: vfio-pci
+    #softdep xhci_hdc pre: vfio-pci
+    #options kvm_amd avic=1
 
     sudo update-initramfs -k all -u
 
